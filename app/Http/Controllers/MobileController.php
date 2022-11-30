@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\ClientRegister;
+use App\Doctor;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -30,45 +31,60 @@ class MobileController extends Controller
             }
     }
 
-    public function ClientProfileUpdate(Request $request)
+    public function registerDoctor(Request $request)
     {
-        $id = $request->input('id');
-        $userid = $request->input('user_id');
-        $name_with_Ins = $request->input('name_with_Ins');
-        $full_name = $request->input('full_name');
-        $nic = $request->input('nic');
-        $birth_day = $request->input('birth_day');
-        $address = $request->input('address');
-        $nationallity = $request->input('nationallity');
 
-        $ClientRegister = '';
+        $id = $request->input('id');
+        $medical_id = $request->input('medical_id');
+        $mobile_no = $request->input('mobile_no');
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
+        $email = $request->input('email');
+        $hospital_name = $request->input('hospital_name');
+        $specialization = $request->input('specialization');
+        $available_date = $request->input('available_date');
+        $available_time = $request->input('available_time');
+        $mobile_no = $request->input('password');
+
+        //----data send e-chaneling API and get return doctor id then assing $echaneling_id---//
+
+        $echaneling_id = "";
+
+        $dataRegister = '';
 
         if ($id == "new") {
-            $ClientRegister = new ClientRegister();
+            $dataRegister = new Doctor();
             $type = "inserted";
         } else {
-            $existing_ClientRegister = ClientRegister::where('id', '=', $id)->first();
-            if ($existing_ClientRegister) {
-                $ClientRegister = ClientRegister::find($existing_ClientRegister->id);
+            $existing_data = Doctor::where('id', '=', $id)->first();
+            if ($existing_data) {
+                $dataRegister = Doctor::find($existing_data->id);
                 $type = "updated";
             }
         }
 
-        $ClientRegister->user_id = $userid;
-        $ClientRegister->name_with_Ins = $name_with_Ins;
-        $ClientRegister->full_name = $full_name;
-        $ClientRegister->nic = $nic;
-        $ClientRegister->birth_day = $birth_day;
-        $ClientRegister->address = $address;
-        $ClientRegister->nationallity = $nationallity;
+        $dataRegister->medical_id = $medical_id;
+        $dataRegister->echaneling_id = $echaneling_id;
+        $dataRegister->mobile_no = $mobile_no;
+        $dataRegister->lat = $lat;
+        $dataRegister->lng = $lng;
+        if($id=="new"){
+            $dataRegister->email = $email;
+        }
+        $dataRegister->hospital_name = $hospital_name;
+        $dataRegister->specialization = $specialization;
+        $dataRegister->available_date = $available_date;
+        $dataRegister->available_time = $available_time;
 
+        if ($dataRegister->save()) {
+            //remove this code//
+            $echanel = Doctor::find($dataRegister->id);
+            $echanel->echaneling_id=$dataRegister->id;
+            //remove this code//
 
-
-        if ($ClientRegister->save()) {
-
-            return response()->json(['http_status' => 'success', 'message' => 'registre details ' . $type . ' successfully', 'userId' => $ClientRegister->user_id], 200);
+            return response()->json(['http_status' => 'success', 'message' => 'registre details ' . $type . ' successfully', 'medical_id' => $dataRegister->medical_id], 200);
         } else {
-            return response()->json(['http_status' => 'error', 'message' => 'User cannot be submitted'], 200);
+            return response()->json(['http_status' => 'error', 'message' => 'data cannot be submitted'], 200);
         }
     }
 
